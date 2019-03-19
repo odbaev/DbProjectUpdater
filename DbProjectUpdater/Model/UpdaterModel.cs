@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -65,7 +65,8 @@ namespace DbProjectUpdater.Model
                 body: (obj, _, server) =>
                 {
                     string schema = (obj as ScriptSchemaObjectBase)?.Schema ?? ((obj as Trigger).Parent as Table).Schema;
-                    string fileName = Path.Combine(schema, _directoryNames[obj.GetType()], $"{obj.Name}.sql");
+                    string objName = Regex.Replace(obj.Name, $"[{new string(Path.GetInvalidFileNameChars())}]", "_");
+                    string fileName = Path.Combine(schema, _directoryNames[obj.GetType()], $"{objName}.sql");
 
                     var scriptOptions = new ScriptingOptions(defaultScriptOptions)
                     {
