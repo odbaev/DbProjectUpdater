@@ -59,6 +59,8 @@ namespace DbProjectUpdater.Model
 
             UpdateDbProjectStructure();
 
+            var projectLock = new object();
+
             Parallel.ForEach(
                 source: dbObjects,
                 localInit: () => new Server(Server.Name),
@@ -89,7 +91,10 @@ namespace DbProjectUpdater.Model
 
                     if (DbProject.GetItemsByEvaluatedInclude(fileName).Count == 0)
                     {
-                        DbProject.AddItem("Build", fileName);
+                        lock (projectLock)
+                        {
+                            DbProject.AddItem("Build", fileName);
+                        }
                     }
 
                     progress.Report((Step: 1, DbObjectsNumber: dbObjectsNumber));
