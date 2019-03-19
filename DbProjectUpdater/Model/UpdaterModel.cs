@@ -80,9 +80,12 @@ namespace DbProjectUpdater.Model
 
                     scripter.Script(new Urn[] { obj.Urn });
 
-                    string script = File.ReadAllText(scriptOptions.FileName, Encoding.UTF8);
-                    script = Regex.Replace(script, "CREATE(?= (PROCEDURE|FUNCTION|VIEW|TRIGGER))", "ALTER");
-                    File.WriteAllText(scriptOptions.FileName, script, Encoding.UTF8);
+                    if (!(obj is Table))
+                    {
+                        string script = File.ReadAllText(scriptOptions.FileName, Encoding.UTF8);
+                        script = Regex.Replace(script, "CREATE(?= (PROC|FUNCTION|VIEW|TRIGGER))", "ALTER", RegexOptions.IgnoreCase);
+                        File.WriteAllText(scriptOptions.FileName, script, Encoding.UTF8);
+                    }
 
                     if (DbProject.GetItemsByEvaluatedInclude(fileName).Count == 0)
                     {
