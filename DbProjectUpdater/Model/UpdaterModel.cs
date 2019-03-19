@@ -1,13 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
-using Microsoft.SqlServer.Management.Smo;
-using Microsoft.Build.Evaluation;
-using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.Build.Evaluation;
 using Microsoft.SqlServer.Management.Sdk.Sfc;
+using Microsoft.SqlServer.Management.Smo;
 
 namespace DbProjectUpdater.Model
 {
@@ -58,8 +58,6 @@ namespace DbProjectUpdater.Model
             int dbObjectsNumber = dbObjects.Count();
 
             UpdateDbProjectStructure();
-
-            var watch = System.Diagnostics.Stopwatch.StartNew();
 
             Parallel.ForEach(
                 source: dbObjects,
