@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -92,9 +92,12 @@ namespace DbProjectUpdater.ViewModel
                 {
                     try
                     {
-                        _updater.DbProject = new Project(value);
+                        _updater.DbProject = new Project(value, null, null, ProjectCollection.GlobalProjectCollection, ProjectLoadSettings.IgnoreMissingImports);
                     }
-                    catch { }
+                    catch (Exception e)
+                    {
+                        MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
 
                 OnPropertyChanged("DbProjectFileName");
@@ -157,11 +160,11 @@ namespace DbProjectUpdater.ViewModel
                     }
                 });
             }
-            catch
+            catch (Exception e)
             {
                 _updater.Server = null;
 
-                MessageBox.Show("Can't connect to server.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
             OnPropertyChanged("ServerNames");
