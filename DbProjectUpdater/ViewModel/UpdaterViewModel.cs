@@ -18,9 +18,11 @@ namespace DbProjectUpdater.ViewModel
 
         private bool _isConnectServer;
         private bool _isUpdateDbProject;
+        private bool _isGetDbObjectsNumber;
 
         private string _serverName;
         private int _progressValue;
+        private int _progressMaxValue;
 
         private readonly OpenFileDialog _projectDialog;
 
@@ -28,6 +30,8 @@ namespace DbProjectUpdater.ViewModel
 
         public UpdaterViewModel()
         {
+            SetInitProgressState();
+
             _projectDialog = new OpenFileDialog()
             {
                 Filter = "VS Database Project|*.sqlproj"
@@ -38,7 +42,7 @@ namespace DbProjectUpdater.ViewModel
                 if (ProgressMaxValue != t.DbObjectsNumber)
                 {
                     ProgressMaxValue = t.DbObjectsNumber;
-                    OnPropertyChanged("ProgressMaxValue");
+                    IsGetDbObjectsNumber = true;
                 }
 
                 ProgressValue += t.Step;
@@ -75,6 +79,8 @@ namespace DbProjectUpdater.ViewModel
             get => _updater.Db?.Name;
             set
             {
+                SetInitProgressState();
+
                 _updater.Db = _updater.Server?.Databases[value];
 
                 UpdateDbProjectCommand.RaiseCanExecuteChanged();
@@ -130,7 +136,25 @@ namespace DbProjectUpdater.ViewModel
             }
         }
 
-        public int ProgressMaxValue { get; set; } = 1;
+        public bool IsGetDbObjectsNumber
+        {
+            get => _isGetDbObjectsNumber;
+            set
+            {
+                _isGetDbObjectsNumber = value;
+                OnPropertyChanged("IsGetDbObjectsNumber");
+            }
+        }
+
+        public int ProgressMaxValue
+        {
+            get => _progressMaxValue;
+            set
+            {
+                _progressMaxValue = value;
+                OnPropertyChanged("ProgressMaxValue");
+            }
+        }
 
         public int ProgressValue
         {
@@ -138,13 +162,14 @@ namespace DbProjectUpdater.ViewModel
             set
             {
                 _progressValue = value;
-
                 OnPropertyChanged("ProgressValue");
             }
         }
 
         public async void ConnectServerAsync()
         {
+            SetInitProgressState();
+
             IsConnectServer = true;
 
             try
@@ -175,6 +200,8 @@ namespace DbProjectUpdater.ViewModel
 
         public void OpenDbProject()
         {
+            SetInitProgressState();
+
             if (_projectDialog.ShowDialog() == true)
             {
                 DbProjectFileName = _projectDialog.FileName;
@@ -183,9 +210,9 @@ namespace DbProjectUpdater.ViewModel
 
         public async void UpdateDbProjectAsync()
         {
-            IsUpdateDbProject = true;
+            SetInitProgressState();
 
-            ProgressValue = 0;
+            IsUpdateDbProject = true;
 
             try
             {
@@ -208,6 +235,13 @@ namespace DbProjectUpdater.ViewModel
         private void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private void SetInitProgressState()
+        {
+            ProgressValue = 0;
+            ProgressMaxValue = 1;
+            IsGetDbObjectsNumber = false;
         }
     }
 }
