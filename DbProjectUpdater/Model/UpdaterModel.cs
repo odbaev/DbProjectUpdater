@@ -28,6 +28,12 @@ namespace DbProjectUpdater.Model
             { typeof(Trigger), "Triggers" },
         };
 
+        private readonly Dictionary<string, string> _replaceMap = new Dictionary<string, string>
+        {
+            { @"\s+(CREATE|ALTER)\s+(PROC|FUNCTION|VIEW|TRIGGER)", $"{Environment.NewLine}{Environment.NewLine}ALTER $2"},
+            { @"\s+GO\s*$", $"{Environment.NewLine}{Environment.NewLine}GO{Environment.NewLine}"}
+        };
+
         public void UpdateDbProject(IProgress<(int Step, int DbObjectsNumber)> progress)
         {
             SetServerInitSystemProperty();
@@ -86,7 +92,12 @@ namespace DbProjectUpdater.Model
                     if (!(obj is Table))
                     {
                         string script = File.ReadAllText(scriptOptions.FileName, Encoding.UTF8);
-                        script = Regex.Replace(script, "CREATE(?= (PROC|FUNCTION|VIEW|TRIGGER))", "ALTER", RegexOptions.IgnoreCase);
+
+                        foreach (var pattern in _replaceMap.Keys)
+                        {
+                            script = Regex.Replace(script, pattern, _replaceMap[pattern], RegexOptions.IgnoreCase);
+                        }
+
                         File.WriteAllText(scriptOptions.FileName, script, Encoding.UTF8);
                     }
 
