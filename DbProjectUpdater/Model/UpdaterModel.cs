@@ -41,6 +41,7 @@ namespace DbProjectUpdater.Model
             };
 
             dbObjectCollection.AddRange(Db.Tables.Cast<Table>().Select(t => t.Triggers));
+            dbObjectCollection.AddRange(Db.Views.Cast<Microsoft.SqlServer.Management.Smo.View>().Select(t => t.Triggers));
 
             var dbObjects = dbObjectCollection.SelectMany(c => c.Cast<ScriptNameObjectBase>())
                 .Where(obj => (bool)obj.Properties["IsSystemObject"].Value == false);
@@ -66,7 +67,7 @@ namespace DbProjectUpdater.Model
                 localInit: () => new Server(Server.Name),
                 body: (obj, _, server) =>
                 {
-                    string schema = (obj as ScriptSchemaObjectBase)?.Schema ?? ((obj as Trigger).Parent as Table).Schema;
+                    string schema = ((obj is Trigger tr ? tr.Parent : obj) as ScriptSchemaObjectBase).Schema;
                     string objName = Regex.Replace(obj.Name, $"[{new string(Path.GetInvalidFileNameChars())}]", "_");
                     string fileName = Path.Combine(schema, _directoryNames[obj.GetType()], $"{objName}.sql");
 
